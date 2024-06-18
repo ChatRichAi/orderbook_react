@@ -1,0 +1,21 @@
+from flask import Flask, jsonify
+import requests
+
+app = Flask(__name__)
+
+@app.route('/btc-long-short-ratio-history/<time_type>', methods=['GET'])
+def get_btc_long_short_ratio_history(time_type):
+    url = 'https://open-api.coinglass.com/public/v2/long_short_history'
+    params = {
+        'time_type': time_type,  # 根据传入的参数获取相应的数据
+        'symbol': 'BTC'
+    }
+    response = requests.get(url, params=params)
+    
+    if response.status_code == 200:
+        return jsonify(response.json())
+    else:
+        return jsonify({"error": "Unable to fetch data"}), 400
+
+if __name__ == '__main__':
+    app.run(debug=True)
