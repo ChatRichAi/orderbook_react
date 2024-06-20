@@ -1,7 +1,7 @@
 orderbook_react 
 
 
-## 目录
+## 详细说明
 ├── public/ # 公共资源目录
 │ ├── index.html # HTML 入口文件
 │ └── ... # 其他静态资源
@@ -19,9 +19,6 @@ orderbook_react
 ├── package.json # 项目依赖和脚本
 ├── package-lock.json # 锁定依赖版本
 └── README.md # 项目说明文件
-
-
-## 详细说明
 
 ### `public/`
 - `index.html`：应用的 HTML 入口文件，包含一个 `div` 元素作为 React 应用的挂载点。
