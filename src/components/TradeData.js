@@ -188,7 +188,7 @@ const TradeData = () => {
                         </ListItem>
                     </List>
                     <Typography variant="body2" color="textSecondary" style={{ marginTop: '16px' }}>
-                        若上方没有您要的问题，请在输入框内输入您的问题。
+                        若上方没有您要咨的问题，请在输入框内输入您的问题。
                     </Typography>
                     <Box display="flex" alignItems="center" style={{ marginTop: '16px' }}>
                         <TextField
