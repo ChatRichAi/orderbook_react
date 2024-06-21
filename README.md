@@ -4,6 +4,25 @@ orderbook_react
 
 ### `public/`
 - `index.html`：应用的 HTML 入口文件，包含一个 `div` 元素作为 React 应用的挂载点。
+- orderbook_react/
+-├── public/ # 公共资源目录
+-│ ├── index.html # HTML 入口文件
+-│ └── ... # 其他静态资源
+-├── src/ # 源代码目录
+-│ ├── assets/ # 静态资源（图片、样式等）
+-│ ├── components/ # React 组件
+-│ │ ├── TradeData.js # 主要的交易数据组件
+-│ │ ├── TradeDataForm.js # 交易数据表单组件
+-│ │ └── ... # 其他组件
+-│ ├── hooks/ # 自定义 Hook
+-│ │ └── useTradeData.js # 交易数据的自定义 Hook
+-│ ├── App.js # 应用的根组件
+-│ ├── index.js # 应用的入口文件
+-│ └── ... # 其他源文件
+-├── package.json # 项目依赖和脚本
+-├── package-lock.json # 锁定依赖版本
+-└── README.md # 项目说明文件
+
 
 ### `src/`
 - `assets/`：存放静态资源，如图片、样式文件等。
