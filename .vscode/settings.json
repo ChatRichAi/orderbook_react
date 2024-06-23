@@ -1,0 +1,21 @@
+{
+  "detectedConfig": {
+    "typescript": false,
+    "naming": "Pascal Case",
+    "unit": "px",
+    "framework": "react",
+    "styling": "CSS"
+  },
+  "locofyConfig": {
+    "project": "Neutrade_Crypto-AI-UI-Kit",
+    "id": "66625b1fd6a5c36ec2058a37",
+    "framework": "react",
+    "typescript": true,
+    "styling": "CSS Modules",
+    "unit": "px",
+    "naming": "Pascal Case",
+    "path": "public/",
+    "componentsPath": "/Users/oneday/orderbook-react/src/components",
+    "screensPath": "/Users/oneday/orderbook-react/src/pages"
+  }
+}
