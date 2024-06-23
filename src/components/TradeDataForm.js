@@ -1,10 +1,21 @@
-import React from 'react';
-import { Container, TextField, Button, Select, MenuItem, FormControl, InputLabel, CircularProgress, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, Typography, Switch, FormControlLabel, Grid, Backdrop, Chip } from '@mui/material';
+import React, { useState } from 'react';
+import { Container, TextField, Button, Select, MenuItem, FormControl, InputLabel, CircularProgress, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, Typography, Switch, FormControlLabel, Grid, Backdrop, Chip, ToggleButton, ToggleButtonGroup } from '@mui/material';
 
 const TradeDataForm = ({ startTime, setStartTime, endTime, setEndTime, symbol, setSymbol, marketType, setMarketType, isRealTime, setIsRealTime, fetchTrades, exportTrades, trades, loading }) => {
+    const [exportLoading, setExportLoading] = useState(false);
+    const [dataType, setDataType] = useState('trades'); // 默认值为 'trades'
+
+    const handleExportTrades = async () => {
+        setExportLoading(true);
+        await exportTrades();
+        setExportLoading(false);
+    };
+
+    const buyTrades = trades.filter(trade => trade.order_type === 'B');
+    const sellTrades = trades.filter(trade => trade.order_type === 'S');
+
     return (
         <Container>
-            <Typography variant="h4" gutterBottom></Typography>
             <Grid container spacing={2} alignItems="center">
                 <Grid item xs={12} sm={6} md={3}>
                     <FormControl fullWidth margin="normal">
@@ -61,74 +72,122 @@ const TradeDataForm = ({ startTime, setStartTime, endTime, setEndTime, symbol, s
                     </FormControl>
                 </Grid>
                 <Grid item xs={12} sm={6} md={2}>
-                <FormControlLabel
-                control={<Switch checked={isRealTime} onChange={(e) => setIsRealTime(e.target.checked)} />}
-                label="实时数据"
-            />
-        </Grid>
-        <Grid item xs={12} sm={6} md={2}>
-            <Button variant="contained" color="primary" onClick={fetchTrades} disabled={loading} fullWidth>
-                {loading ? <CircularProgress size={24} /> : '获取数据'}
-            </Button>
-        </Grid>
-        <Grid item xs={12} sm={6} md={2}>
-            <Button variant="contained" color="secondary" onClick={exportTrades} fullWidth>
-                导出数据
-            </Button>
-        </Grid>
-    </Grid>
-    <TableContainer component={Paper} style={{ marginTop: '20px' }}>
-        <Table>
-            <TableHead>
-                <TableRow>
-                    <TableCell>时间</TableCell>
-                    <TableCell>标的</TableCell>
-                    <TableCell>价格</TableCell>
-                    <TableCell>数量</TableCell>
-                    <TableCell>多空</TableCell>
-                    <TableCell>订单类型</TableCell>
-                </TableRow>
-            </TableHead>
-            <TableBody>
-                {trades.map((trade, index) => (
-                    <TableRow key={index}>
-                        <TableCell>{new Date(trade.timestamp).toLocaleString('zh-CN', { timeZone: 'UTC', year: 'numeric', month: 'numeric', day: 'numeric', hour: 'numeric', minute: 'numeric' })}</TableCell>
-                        <TableCell>{trade.symbol}</TableCell>
-                        <TableCell>{trade.price}</TableCell>
-                        <TableCell>
-                            {trade.quantity > 10 && (
-                                <span
-                                    style={{
-                                        display: 'inline-block',
-                                        width: '10px',
-                                        height: '10px',
-                                        borderRadius: '50%',
-                                        backgroundColor: trade.order_type === 'B' ? 'green' : 'red',
-                                        marginRight: '5px'
-                                    }}
-                                ></span>
-                            )}
-                            {trade.quantity}
-                        </TableCell>
-                        <TableCell>
-                            <Chip
-                                label={trade.order_type === 'B' ? '买单' : '卖单'}
-                                style={{
-                                    backgroundColor: trade.order_type === 'B' ? 'green' : 'red',
-                                    color: 'white'
-                                }}
-                            />
-                        </TableCell>
-                        <TableCell>{marketType === 'spot' ? '现货' : '合约'}</TableCell>
-                    </TableRow>
-                ))}
-            </TableBody>
-        </Table>
-    </TableContainer>
-    <Backdrop style={{ color: '#fff', zIndex: 1300 }} open={loading}>
-        <CircularProgress color="inherit" />
-    </Backdrop>
-</Container>
+                    <FormControlLabel
+                        control={<Switch checked={isRealTime} onChange={(e) => setIsRealTime(e.target.checked)} />}
+                        label="实时数据"
+                    />
+                </Grid>
+                <Grid item xs={12} sm={6} md={2}>
+                    <ToggleButtonGroup
+                        value={dataType}
+                        exclusive
+                        onChange={(e, newDataType) => setDataType(newDataType)}
+                        aria-label="data type"
+                    >
+                        <ToggleButton value="orderbook" aria-label="order book">
+                            订单簿
+                        </ToggleButton>
+                        <ToggleButton value="trades" aria-label="trades">
+                            实时成交
+                        </ToggleButton>
+                    </ToggleButtonGroup>
+                </Grid>
+                <Grid item xs={12} sm={6} md={2}>
+                    <Button variant="contained" color="primary" onClick={() => fetchTrades(false)} disabled={loading} fullWidth>
+                        {loading ? <CircularProgress size={24} /> : '获取数据'}
+                    </Button>
+                </Grid>
+                <Grid item xs={12} sm={6} md={2}>
+                    <Button variant="contained" color="secondary" onClick={handleExportTrades} disabled={exportLoading} fullWidth>
+                        {exportLoading ? <CircularProgress size={24} /> : '导出数据'}
+                    </Button>
+                </Grid>
+            </Grid>
+            <Grid container spacing={2} style={{ marginTop: '20px' }}>
+                <Grid item xs={12} md={6}>
+                    <TableContainer component={Paper} style={{ marginTop: '10px' }}>
+                        <Table>
+                            <TableHead>
+                                <TableRow>
+                                    <TableCell>时间</TableCell>
+                                    <TableCell>标的</TableCell>
+                                    <TableCell>价格</TableCell>
+                                    <TableCell>数量</TableCell>
+                                    <TableCell>多空</TableCell>
+                                    <TableCell>订单类型</TableCell>
+                                </TableRow>
+                            </TableHead>
+                            <TableBody>
+                                {buyTrades.map((trade, index) => (
+                                    <TableRow key={index}>
+                                        <TableCell>{new Date(trade.timestamp).toLocaleString('zh-CN', { timeZone: 'UTC', year: 'numeric', month: 'numeric', day: 'numeric', hour: 'numeric', minute: 'numeric' })}</TableCell>
+                                        <TableCell>{trade.symbol}</TableCell>
+                                        <TableCell>{trade.price}</TableCell>
+                                        <TableCell>
+                                            {trade.quantity > 10 && (
+                                                <span style={{ color: 'green' }}>●</span>
+                                            )}
+                                            {trade.quantity}
+                                        </TableCell>
+                                        <TableCell>
+                                            <Chip
+                                                label="买单"
+                                                style={{
+                                                    backgroundColor: 'green',
+                                                    color: 'white'
+                                                }}
+                                            />
+                                        </TableCell>
+                                        <TableCell>{marketType === 'spot' ? '现货' : '合约'}</TableCell>
+                                    </TableRow>
+                                ))}
+                            </TableBody>
+                        </Table>
+                        </TableContainer>
+                </Grid>
+                <Grid item xs={12} md={6}>
+                    <TableContainer component={Paper} style={{ marginTop: '10px' }}>
+                        <Table>
+                            <TableHead>
+                                <TableRow>
+                                    <TableCell>时间</TableCell>
+                                    <TableCell>标的</TableCell>
+                                    <TableCell>价格</TableCell>
+                                    <TableCell>数量</TableCell>
+                                    <TableCell>多空</TableCell>
+                                    <TableCell>订单类型</TableCell>
+                                </TableRow>
+                            </TableHead>
+                            <TableBody>
+                                {sellTrades.map((trade, index) => (
+                                    <TableRow key={index}>
+                                        <TableCell>{new Date(trade.timestamp).toLocaleString('zh-CN', { timeZone: 'UTC', year: 'numeric', month: 'numeric', day: 'numeric', hour: 'numeric', minute: 'numeric' })}</TableCell>
+                                        <TableCell>{trade.symbol}</TableCell>
+                                        <TableCell>{trade.price}</TableCell>
+                                        <TableCell>
+                                            {trade.quantity > 10 && (
+                                                <span style={{ color: 'red' }}>●</span>
+                                            )}
+                                            {trade.quantity}
+                                        </TableCell>
+                                        <TableCell>
+                                            <Chip
+                                                label="卖单"
+                                                style={{
+                                                    backgroundColor: 'red',
+                                                    color: 'white'
+                                                }}
+                                            />
+                                        </TableCell>
+                                        <TableCell>{marketType === 'spot' ? '现货' : '合约'}</TableCell>
+                                    </TableRow>
+                                ))}
+                            </TableBody>
+                        </Table>
+                    </TableContainer>
+                </Grid>
+            </Grid>
+        </Container>
     );
 };
 
