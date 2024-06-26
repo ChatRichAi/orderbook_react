@@ -9,20 +9,22 @@ const useTradeData = () => {
     const [marketType, setMarketType] = useState('spot');
     const [isRealTime, setIsRealTime] = useState(false);
     const [loading, setLoading] = useState(false);
+    const [dataType, setDataType] = useState('trades'); // 默认值为 'trades'
 
     const filterTrades = useCallback((data) => {
         return data.filter(trade => trade.quantity > 0.5).slice(0, 100);
     }, []);
 
-    const fetchTrades = useCallback(async () => {
+    const fetchTrades = useCallback(async (isRealTime, dataType) => {
         setLoading(true);
         try {
-            const response = await axios.get('http://127.0.0.1:5003/get-orderbook', {
+            const response = await axios.get('http://127.0.0.1:5003/get-data', {
                 params: {
                     start_time: startTime,
                     end_time: endTime,
                     symbol: symbol,
-                    market_type: marketType
+                    market_type: marketType,
+                    data_type: dataType
                 }
             });
             console.log('Fetched trades:', response.data);
@@ -35,12 +37,13 @@ const useTradeData = () => {
         }
     }, [startTime, endTime, symbol, marketType, filterTrades]);
 
-    const fetchLatestTrades = useCallback(async () => {
+    const fetchLatestTrades = useCallback(async (dataType) => {
         setLoading(true);
         try {
             const response = await axios.get('http://127.0.0.1:5003/get-latest-orderbook', {
                 params: {
-                    market_type: marketType
+                    market_type: marketType,
+                    data_type: dataType
                 }
             });
             console.log('Latest trades:', response.data);
@@ -58,12 +61,13 @@ const useTradeData = () => {
 
     const exportTrades = async () => {
         try {
-            const response = await axios.get('http://127.0.0.1:5003/export-orderbook', {
+            const response = await axios.get('http://127.0.0.1:5003/export-data', {
                 params: {
                     start_time: startTime,
                     end_time: endTime,
                     symbol: symbol,
-                    market_type: marketType
+                    market_type: marketType,
+                    data_type: dataType
                 },
                 responseType: 'blob'
             });
@@ -82,18 +86,18 @@ const useTradeData = () => {
 
     useEffect(() => {
         if (isRealTime) {
-            const interval = setInterval(fetchLatestTrades, 5000);
+            const interval = setInterval(() => fetchLatestTrades(dataType), 5000);
             return () => clearInterval(interval);
         } else {
             setTrades([]);
         }
-    }, [isRealTime, marketType, fetchLatestTrades]);
+    }, [isRealTime, marketType, fetchLatestTrades, dataType]);
 
     useEffect(() => {
         if (!isRealTime && startTime && endTime) {
-            fetchTrades();
+            fetchTrades(false, dataType);
         }
-    }, [startTime, endTime, symbol, marketType, isRealTime, fetchTrades]);
+    }, [startTime, endTime, symbol, marketType, isRealTime, fetchTrades, dataType]);
 
     return {
         trades,
@@ -109,7 +113,9 @@ const useTradeData = () => {
         setIsRealTime,
         fetchTrades,
         exportTrades,
-        loading
+        loading,
+        dataType,
+        setDataType
     };
 };
 

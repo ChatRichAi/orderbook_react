@@ -1,14 +1,38 @@
 import React, { useState } from 'react';
-import { Container, TextField, Button, Select, MenuItem, FormControl, InputLabel, CircularProgress, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, Typography, Switch, FormControlLabel, Grid, Backdrop, Chip, ToggleButton, ToggleButtonGroup } from '@mui/material';
+import { Container, TextField, Button, Select, MenuItem, FormControl, InputLabel, CircularProgress, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, Typography, Switch, FormControlLabel, Grid, Backdrop, Chip, ToggleButton, ToggleButtonGroup, LinearProgress } from '@mui/material';
 
-const TradeDataForm = ({ startTime, setStartTime, endTime, setEndTime, symbol, setSymbol, marketType, setMarketType, isRealTime, setIsRealTime, fetchTrades, exportTrades, trades, loading }) => {
+const TradeDataForm = ({ startTime, setStartTime, endTime, setEndTime, symbol, setSymbol, marketType, setMarketType, isRealTime, setIsRealTime, fetchTrades, exportTrades, trades, loading, dataType, setDataType }) => {
     const [exportLoading, setExportLoading] = useState(false);
-    const [dataType, setDataType] = useState('trades'); // 默认值为 'trades'
+    const [exportProgress, setExportProgress] = useState(0);
+    const [fetchLoading, setFetchLoading] = useState(false);
+    const [fetchProgress, setFetchProgress] = useState(0);
 
     const handleExportTrades = async () => {
         setExportLoading(true);
+        setExportProgress(0);
+
+        // 模拟导出过程，更新进度
+        for (let i = 0; i <= 100; i++) {
+            setExportProgress(i);
+            await new Promise(resolve => setTimeout(resolve, 50)); // 模拟延迟
+        }
+
         await exportTrades();
         setExportLoading(false);
+    };
+
+    const handleFetchTrades = async () => {
+        setFetchLoading(true);
+        setFetchProgress(0);
+
+        // 模拟获取数据过程，更新进度
+        for (let i = 0; i <= 100; i++) {
+            setFetchProgress(i);
+            await new Promise(resolve => setTimeout(resolve, 30)); // 模拟延迟
+        }
+
+        await fetchTrades(false, dataType);
+        setFetchLoading(false);
     };
 
     const buyTrades = trades.filter(trade => trade.order_type === 'B');
@@ -93,14 +117,28 @@ const TradeDataForm = ({ startTime, setStartTime, endTime, setEndTime, symbol, s
                     </ToggleButtonGroup>
                 </Grid>
                 <Grid item xs={12} sm={6} md={2}>
-                    <Button variant="contained" color="primary" onClick={() => fetchTrades(false)} disabled={loading} fullWidth>
-                        {loading ? <CircularProgress size={24} /> : '获取数据'}
+                    <Button variant="contained" color="primary" onClick={handleFetchTrades} disabled={fetchLoading} fullWidth>
+                        获取数据
                     </Button>
                 </Grid>
                 <Grid item xs={12} sm={6} md={2}>
                     <Button variant="contained" color="secondary" onClick={handleExportTrades} disabled={exportLoading} fullWidth>
-                        {exportLoading ? <CircularProgress size={24} /> : '导出数据'}
+                        导出数据
                     </Button>
+                </Grid>
+                <Grid item xs={12}>
+                    {fetchLoading && (
+                        <>
+                            <LinearProgress variant="determinate" value={fetchProgress} />
+                            <Typography variant="body2" color="textSecondary">{`${fetchProgress}%`}</Typography>
+                        </>
+                    )}
+                    {exportLoading && (
+                        <>
+                            <LinearProgress variant="determinate" value={exportProgress} />
+                            <Typography variant="body2" color="textSecondary">{`${exportProgress}%`}</Typography>
+                        </>
+                    )}
                 </Grid>
             </Grid>
             <Grid container spacing={2} style={{ marginTop: '20px' }}>
@@ -143,7 +181,7 @@ const TradeDataForm = ({ startTime, setStartTime, endTime, setEndTime, symbol, s
                                 ))}
                             </TableBody>
                         </Table>
-                        </TableContainer>
+                    </TableContainer>
                 </Grid>
                 <Grid item xs={12} md={6}>
                     <TableContainer component={Paper} style={{ marginTop: '10px' }}>
